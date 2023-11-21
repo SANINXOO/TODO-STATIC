@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #task {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-bottom: 2px solid #ccc;
+            margin-bottom: 20px;
+            outline: none;
+            background-color: #fff;
+        }
+
+        #list {
+            max-width: 400px;
+            width: 100%;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        #list > div {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .buttons button {
+            padding: 6px 12px;
+            background-color: #22724b;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .buttons button:hover {
+            background-color: #f1c682;
+            color: black;
+        }
+    </style>
+    
+   
+</head>
+<body>
+    <input type="text" id="task"  onchange="addTask()" placeholder="type here">
+   <div id="list">
+      
+    </div> 
+
+    <script>
+        
+
+      let data=document.getElementById("task");
+      function addTask(){
+        let task=data.value;
+        // console.log(data);
+
+        fetch("http://localhost:3009/api/addtask",{
+            method:"POST",
+            headers:{"content-type":"application/json"},
+            body:JSON.stringify({task})
+        }).then(()=>{
+            alert("task added");
+
+        }).catch("Error")
+        getTodo();
+        data.value=""
+      }
+
+      async function getTodo()
+        {
+            const task=await fetch("http://localhost:3009/api/gettask");
+            const data=await task.json();
+            console.log(data);
+            s=""
+            data.map(dt=>{
+                s+=`
+        <div>${dt.task}</div>
+        <div class="buttons">
+           
+            <div><button onclick="delTodo('${dt._id}')">delete</button></div>
+        </div>
+     `
+            })
+            document.getElementById("list").innerHTML=s
+        }
+        getTodo();
+        function show(id){
+            value=id
+            alert(value)
+        }
+      
+        function delTodo(id)
+        {
+            fetch(`http://localhost:3009/api/deltask/${id}`,{
+                method:"DELETE",
+            }).then((data)=>{
+                if(data.status==200)
+                {
+                    alert("delete")
+                }
+                else{
+                    alert("error")
+                }
+                getTodo();
+            }).catch((error)=>{
+                console.log(error);
+            })
+        }
+
+        
+    //     function editTodo(id) {
+    //     let newTask = prompt("Enter the new task", "");
+    //     if (newTask) {
+    //         fetch(`http://localhost:3010/api/edittask/${id}`, {
+    //             method: "PATCH",
+    //             headers: { "Content-Type": "application/json" },
+    //             body: JSON.stringify({ task: newTask })
+    //         }).then((data) => {
+    //             if (data.status == 201) {
+    //                 alert("Edited");
+    //                 data.value = newTask;
+    //             } else {
+    //                 alert("error");
+    //             }
+    //             getTodo();
+    //         }).catch((error) => {
+    //             console.log(error);
+    //         });
+    //     }
+    // }
+    </script>
+    
+</body>
+</html>
